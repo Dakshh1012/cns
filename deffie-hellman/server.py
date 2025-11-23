@@ -1,15 +1,34 @@
 import socket
 import random
 
-# Public parameters (same on both sides)
-p = 23          # prime
-g = 5           # primitive root mod p
-
 HOST = "127.0.0.1"
 PORT = 5000
 
+def is_prime(n):
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+    for i in range(3, int(n**0.5) + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
 def main():
-    # 1. Create TCP socket
+    # Ask user for public parameters
+    while True:
+        p = int(input("Enter prime number p (must be > 5): "))
+        if p > 5 and is_prime(p):
+            break
+        print(f"[ERROR] {p} is not a valid prime or is too small. Use prime > 5")
+    
+    g = int(input("Enter primitive root g (1 < g < p): "))
+    if not (1 < g < p):
+        print(f"[ERROR] g must be between 1 and {p-1}")
+        return
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
     server.listen(1)
@@ -18,21 +37,23 @@ def main():
     conn, addr = server.accept()
     print(f"[SERVER] Connected by {addr}")
 
-    # 2. Server chooses private key a
-    a = random.randint(2, p-2)
-    A = pow(g, a, p)  # A = g^a mod p
+    # Send p and g first
+    conn.send(f"{p},{g}".encode())
+
+    # Generate private key
+    a = random.randint(2, p - 2)
+    A = pow(g, a, p)
     print(f"[SERVER] Private a = {a}, Public A = {A}")
 
-    # 3. Receive client's public key B
-    data = conn.recv(1024).decode()
-    B = int(data)
+    # Receive B
+    B = int(conn.recv(1024).decode())
     print(f"[SERVER] Received B = {B}")
 
-    # 4. Send A to client
+    # Send A
     conn.send(str(A).encode())
     print(f"[SERVER] Sent A = {A}")
 
-    # 5. Compute shared key: K = B^a mod p
+    # Shared key
     K = pow(B, a, p)
     print(f"[SERVER] Shared secret K = {K}")
 
