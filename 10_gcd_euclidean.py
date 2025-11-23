@@ -4,21 +4,32 @@ Finds the greatest common divisor of two numbers
 Uses the principle: gcd(a, b) = gcd(b, a mod b)
 """
 
-def gcd_euclidean(a, b):
+def euclidean(a, b):
     """Find GCD using Euclidean algorithm
     Returns: gcd(a, b)
-    Shows all steps
+    Shows all steps in table format
     """
+    # Ensure r1 > r2
+    if a > b:
+        r1 = a
+        r2 = b
+    else:
+        r1 = b
+        r2 = a
+    
     steps = []
-    original_a, original_b = a, b
+    print(f"\n{'Q':<5} {'R1':<5} {'R2':<5} {'R':<5}")
+    print("-" * 25)
     
-    while b != 0:
-        q = a // b
-        r = a % b
-        steps.append(f"{a} = {b} × {q} + {r}")
-        a, b = b, r
+    while r2 != 0:
+        q = r1 // r2
+        r = r1 % r2
+        print(f"{q:<5} {r1:<5} {r2:<5} {r:<5}")
+        steps.append((q, r1, r2, r))
+        r1 = r2
+        r2 = r
     
-    return a, steps
+    return r1, steps
 
 def gcd_euclidean_menu():
     """Menu-driven GCD Euclidean algorithm"""
@@ -38,11 +49,7 @@ def gcd_euclidean_menu():
                     print("Please enter positive numbers!")
                     continue
                 
-                gcd_val, steps = gcd_euclidean(a, b)
-                
-                print(f"\n=== EUCLIDEAN ALGORITHM STEPS ===")
-                for step in steps:
-                    print(f"  {step}")
+                gcd_val, steps = euclidean(a, b)
                 
                 print(f"\n✓ GCD({a}, {b}) = {gcd_val}")
             

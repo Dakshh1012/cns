@@ -4,19 +4,42 @@ Finds GCD and Bezout coefficients (x, y) such that: a*x + b*y = gcd(a, b)
 This is more powerful than simple Euclidean as it provides coefficients
 """
 
-def extended_gcd(a, b):
+def extended_euclidean(a, b):
     """Extended Euclidean Algorithm
-    Returns: (gcd, x, y) where a*x + b*y = gcd
+    Returns: (gcd, s, t) where a*s + b*t = gcd
     
-    Works backwards through Euclidean algorithm to find coefficients
+    Shows all steps in table format with s and t coefficients
     """
-    if b == 0:
-        return a, 1, 0
+    # Ensure r1 > r2
+    if a > b:
+        r1 = a
+        r2 = b
     else:
-        gcd_val, x1, y1 = extended_gcd(b, a % b)
-        x = y1
-        y = x1 - (a // b) * y1
-        return gcd_val, x, y
+        r1 = b
+        r2 = a
+    
+    t1 = 0
+    t2 = 1
+    s1 = 1
+    s2 = 0
+    
+    print(f"\n{'Q':<5} {'R1':<5} {'R2':<5} {'R':<5} {'S1':<5} {'S2':<5} {'S':<5} {'T1':<5} {'T2':<5} {'T':<5}")
+    print("-" * 105)
+    
+    while r2 != 0:
+        q = r1 // r2
+        r = r1 % r2
+        t = t1 - t2 * q
+        s = s1 - s2 * q
+        print(f"{q:<5} {r1:<5} {r2:<5} {r:<5} {s1:<5} {s2:<5} {s:<5} {t1:<5} {t2:<5} {t:<5}")
+        r1 = r2
+        r2 = r
+        t1 = t2
+        t2 = t
+        s1 = s2
+        s2 = s
+    
+    return r1, s1, t1
 
 def extended_gcd_menu():
     """Menu-driven Extended Euclidean Algorithm"""
@@ -36,21 +59,18 @@ def extended_gcd_menu():
                     print("Please enter positive numbers!")
                     continue
                 
-                gcd_val, x, y = extended_gcd(a, b)
+                gcd_val, s, t = extended_euclidean(a, b)
                 
                 print(f"\n=== EXTENDED EUCLIDEAN RESULT ===")
                 print(f"GCD({a}, {b}) = {gcd_val}")
+                
                 print(f"\nBezout Coefficients:")
-                print(f"  x = {x}")
-                print(f"  y = {y}")
+                print(f"  s = {s}")
+                print(f"  t = {t}")
                 
                 print(f"\nVerification (Bezout's Identity):")
-                print(f"  {a} × ({x}) + {b} × ({y}) = {a*x + b*y}")
-                print(f"  ✓ Confirmed: {a*x + b*y} = {gcd_val}")
-                
-                # Show the mathematical relationship
-                print(f"\nMathematical Form:")
-                print(f"  {a}×{x} + {b}×{y} = {gcd_val}")
+                print(f"  {a} × {s} + {b} × {t} = {a*s + b*t}")
+                print(f"  ✓ Confirmed: {a*s + b*t} = {gcd_val}")
             
             except ValueError:
                 print("Invalid input! Please enter integers.")

@@ -4,42 +4,63 @@ Finds the multiplicative inverse of a number modulo m
 Formula: Find MI such that (a × MI) ≡ 1 (mod m)
 
 Mathematical Basis:
-If gcd(a, m) = 1, then Extended Euclidean gives us: a*x + m*y = 1
+If gcd(a, m) = 1 (coprime), then Extended Euclidean gives us: a*x + m*y = 1
 Taking mod m: (a*x) mod m = 1
 So x is the multiplicative inverse of a modulo m
 """
 
-def extended_gcd(a, b):
-    """Extended Euclidean Algorithm
-    Returns: (gcd, x, y) where a*x + b*y = gcd
-    """
-    if b == 0:
-        return a, 1, 0
+def euclidean(a, b):
+    """Find GCD using Euclidean algorithm - checks if MI exists"""
+    if a > b:
+        r1 = a
+        r2 = b
     else:
-        gcd_val, x1, y1 = extended_gcd(b, a % b)
-        x = y1
-        y = x1 - (a // b) * y1
-        return gcd_val, x, y
+        r1 = b
+        r2 = a
+    
+    while r2 != 0:
+        q = r1 // r2
+        r = r1 % r2
+        r1 = r2
+        r2 = r
+    
+    return r1
 
-def multiplicative_inverse_extended_euclidean(a, m):
+def multiplicative_inverse(a, m):
     """Find multiplicative inverse of a mod m using Extended Euclidean
     Returns: MI such that (a * MI) ≡ 1 (mod m)
     
-    Steps:
-    1. Use Extended Euclidean to find gcd(a, m) and coefficients
-    2. If gcd(a, m) ≠ 1, inverse doesn't exist
-    3. Otherwise, x from Extended Euclidean is the multiplicative inverse
-    4. Return (x mod m + m) mod m to ensure positive result
+    MI only exists if gcd(a, m) = 1 (a and m are coprime)
     """
-    gcd_val, x, y = extended_gcd(a, m)
+    # Check if MI exists
+    if euclidean(m, a) != 1:
+        return None
     
-    if gcd_val != 1:
-        return None, None, None  # Multiplicative inverse doesn't exist
+    # Apply Extended Euclidean to find MI
+    r1 = m
+    r2 = a % m
     
-    # x is the inverse, normalize to positive
-    mi = (x % m + m) % m
+    t1 = 0
+    t2 = 1
     
-    return mi, gcd_val, x
+    print(f"\n{'Q':<5} {'R1':<5} {'R2':<5} {'R':<5} {'T1':<5} {'T2':<5} {'T':<5}")
+    print("-" * 50)
+    
+    while r2 != 0:
+        q = r1 // r2
+        r = r1 % r2
+        t = t1 - t2 * q
+        print(f"{q:<5} {r1:<5} {r2:<5} {r:<5} {t1:<5} {t2:<5} {t:<5}")
+        r1 = r2
+        r2 = r
+        t1 = t2
+        t2 = t
+    
+    mi = t1
+    if mi < 0:
+        mi += m
+    
+    return mi
 
 def multiplicative_inverse_menu():
     """Menu-driven Multiplicative Inverse using Extended Euclidean"""
@@ -59,19 +80,15 @@ def multiplicative_inverse_menu():
                     print("Please enter positive numbers!")
                     continue
                 
-                mi, gcd_val, x = multiplicative_inverse_extended_euclidean(a, m)
+                mi = multiplicative_inverse(a, m)
                 
                 if mi is None:
                     print(f"\n✗ Multiplicative Inverse does NOT exist!")
-                    print(f"  Reason: GCD({a}, {m}) = {gcd_val} ≠ 1")
-                    print(f"  (Inverse only exists if a and m are coprime)")
+                    print(f"  Reason: GCD({a}, {m}) ≠ 1")
+                    print(f"  (MI only exists if a and m are coprime)")
                 else:
                     print(f"\n=== MULTIPLICATIVE INVERSE RESULT ===")
                     print(f"Multiplicative Inverse of {a} mod {m} = {mi}")
-                    
-                    print(f"\nExtended Euclidean Coefficients:")
-                    print(f"  GCD({a}, {m}) = {gcd_val}")
-                    print(f"  {a} × {x} + {m} × y = {gcd_val}")
                     
                     print(f"\nVerification:")
                     print(f"  ({a} × {mi}) mod {m} = {(a * mi) % m}")
